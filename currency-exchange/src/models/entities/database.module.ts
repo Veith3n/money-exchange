@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { requireEnv } from 'src/env';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT, 10),
-      username: process.env.POSTGRES_USERNAME,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DATABASE,
+      host: requireEnv('POSTGRES_HOST'),
+      port: parseInt(requireEnv('POSTGRES_PORT')),
+      username: requireEnv('POSTGRES_USERNAME'),
+      password: requireEnv('POSTGRES_PASSWORD'),
+      database: requireEnv('POSTGRES_DATABASE'),
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
     }),
