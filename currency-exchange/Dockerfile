@@ -18,5 +18,5 @@ RUN npm run build
 HEALTHCHECK --interval=5s --timeout=3s \
   CMD curl --fail "http://localhost:$APP_PORT/health/" || exit 1
 
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start:dev"]
 
