@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import { HealthStatusDto } from './dto/health.status.dto';
 
 @Injectable()

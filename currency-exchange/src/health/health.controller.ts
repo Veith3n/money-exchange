@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+
 import { HealthStatusDto } from './dto/health.status.dto';
 import { HealthService } from './health.service';
 
