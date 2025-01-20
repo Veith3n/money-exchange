@@ -9,8 +9,13 @@ import { UserDto } from './dto/user.dto';
 export class UserApiService {
   constructor(private readonly userService: UserService) {}
 
+  /**
+   * Creates a new user.
+   * @param {CreateUserDto} createUserDto - The data transfer object containing user details.
+   * @returns {Promise<UserDto>} The created user dto.
+   * @throws {UserExistsError} If a user with the given email already exists.
+   */
   public async create(userDto: CreateUserDto): Promise<UserDto> {
-    // TODO: handle existing user
     const createdUser = await this.userService.create(userDto);
 
     return this.mapUserToDto(createdUser);

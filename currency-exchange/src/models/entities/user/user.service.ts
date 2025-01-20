@@ -9,6 +9,13 @@ interface CreateUserDto {
   password: string;
 }
 
+// TODO: move it
+export class UserExistsError extends Error {
+  constructor() {
+    super('User already exists');
+  }
+}
+
 @Injectable()
 export class UserService {
   constructor(
@@ -20,7 +27,21 @@ export class UserService {
     return this.userRepo.findOneByOrFail({ id: userId });
   }
 
-  public create(user: CreateUserDto): Promise<User> {
+  /**
+   * Creates a new user.
+   * @param {CreateUserDto} createUserDto - The data transfer object containing user details.
+   * @returns {Promise<User>} The created user.
+   * @throws {UserExistsError} If a user with the given email already exists.
+   */
+  public async create(user: CreateUserDto): Promise<User> {
+    const userExists = await this.userRepo.exists({
+      where: { email: user.email },
+    });
+
+    if (userExists) {
+      throw new UserExistsError();
+    }
+
     return this.userRepo.save(user);
   }
 }

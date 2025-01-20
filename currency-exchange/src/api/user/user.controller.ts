@@ -1,9 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOperation,
 } from '@nestjs/swagger';
+import { UserExistsError } from 'src/models/entities/user/user.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
@@ -18,6 +19,16 @@ export class UserController {
   @ApiCreatedResponse({ type: UserDto })
   @ApiBadRequestResponse()
   async createUser(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
-    return this.userApiService.create(createUserDto);
+    try {
+      const createdUser = await this.userApiService.create(createUserDto);
+
+      return createdUser;
+    } catch (error: unknown) {
+      if (error instanceof UserExistsError) {
+        throw new BadRequestException(
+          'User with the given email already exists',
+        );
+      }
+    }
   }
 }
