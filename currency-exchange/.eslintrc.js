@@ -5,7 +5,11 @@ module.exports = {
     tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin', 'simple-import-sort'],
+  plugins: [
+    '@typescript-eslint/eslint-plugin',
+    'simple-import-sort',
+    'unused-imports',
+  ],
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
@@ -23,5 +27,15 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
+    'unused-imports/no-unused-imports': 'error',
+    'unused-imports/no-unused-vars': [
+      'warn',
+      {
+        vars: 'all',
+        varsIgnorePattern: '^_',
+        args: 'after-used',
+        argsIgnorePattern: '^_',
+      },
+    ],
   },
 };
