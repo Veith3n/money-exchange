@@ -5,10 +5,13 @@ import { DataSource } from 'typeorm/data-source/DataSource';
 config(); // Load environment variables from .env file
 const configService = new ConfigService();
 
+const isDevelopment = configService.get<string>('NODE_ENV') === 'development';
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  // host: configService.get<string>('POSTGRES_HOST'),
-  host: 'localhost', // left for development purposes
+  host: isDevelopment
+    ? 'localhost'
+    : configService.get<string>('POSTGRES_HOST'),
   port: parseInt(configService.get<string>('POSTGRES_PORT')),
   username: configService.get<string>('POSTGRES_USERNAME'),
   password: configService.get<string>('POSTGRES_PASSWORD'),
