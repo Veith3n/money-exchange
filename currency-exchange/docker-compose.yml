@@ -18,6 +18,9 @@ services:
       - ./.env.postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # TODO: do not expose this in production
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
     logging:
       driver: 'json-file'
     restart: unless-stopped
