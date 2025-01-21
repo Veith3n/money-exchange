@@ -5,12 +5,16 @@ services:
       - '${APP_PORT}:${APP_PORT}'
     env_file:
       - ./.env
+    environment:
+      - NODE_ENV=production
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
+      web-migrations:
+        condition: service_completed_successfully
 
   postgres:
     image: postgres:17.2
@@ -30,6 +34,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  web-migrations:
+    build: .
+    command: npm run migration:run
+    env_file:
+      - ./.env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

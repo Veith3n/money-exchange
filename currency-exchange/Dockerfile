@@ -13,8 +13,6 @@ RUN npm install
 
 COPY . .
 
-RUN rm typeorm.ts
-
 RUN npm run build
 
 HEALTHCHECK --interval=5s --timeout=3s \
