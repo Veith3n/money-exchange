@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   port: parseInt(configService.get<string>('POSTGRES_PORT')),
   username: configService.get<string>('POSTGRES_USERNAME'),
   password: configService.get<string>('POSTGRES_PASSWORD'),
-  database: configService.get<string>('POSTGRES_DB'),
+  database: configService.get<string>('POSTGRES_DATABASE'),
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
   migrations: ['src/models/migrations/*.ts'],
   synchronize: false,
