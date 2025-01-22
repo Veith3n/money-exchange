@@ -17,6 +17,7 @@ async function bootstrap() {
     .setTitle('Currency Exchange API')
     .setDescription('The Currency Exchange API documentation')
     .setVersion('0.1')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
