@@ -27,6 +27,12 @@ export class UserService {
     return this.userRepo.findOneByOrFail({ id: userId });
   }
 
+  public async getByEmail(email: string): Promise<User | undefined> {
+    const user = await this.userRepo.findOneBy({ email });
+
+    return user || undefined;
+  }
+
   /**
    * Creates a new user.
    * @param {CreateUserDto} createUserDto - The data transfer object containing user details.
