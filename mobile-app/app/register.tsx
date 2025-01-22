@@ -26,6 +26,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
     }
 
     try {
+      //   TODO: handle case when in the be response account with given email already exists
       await currencyExchangeApiService.register(email, password);
 
       router.push('/HomeScreen');
