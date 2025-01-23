@@ -1,10 +1,7 @@
 {
   "name": "currency-exchange",
   "private": true,
-  "workspaces": [
-    "currency-exchange",
-    "mobile-app"
-  ],
+  "workspaces": [],
   "scripts": {
     "start:backend": "cd currency-exchange && npm run start",
     "start:mobile": "cd mobile-app && npm start",
