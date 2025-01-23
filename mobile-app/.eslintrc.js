@@ -1,6 +1,6 @@
 // https://docs.expo.dev/guides/using-eslint/
 module.exports = {
-  plugins: ['unused-imports'],
+  plugins: ['simple-import-sort', 'unused-imports'],
   extends: 'expo',
   ignorePatterns: ['/dist/*'],
   rules: {
@@ -14,5 +14,7 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
   },
 };
