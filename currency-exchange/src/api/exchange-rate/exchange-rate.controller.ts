@@ -1,8 +1,14 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { CurrencyCode } from 'src/types/currency-codes.enum';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 
+import { HttpExceptionResponse } from '../dto/http-exception-response';
 import { ExchangeRateDto } from './dto/exchange-rate.dto';
+import { GetExchangeRateQueryDto } from './dto/get-exchange-rate-query.dto';
 import { ExchangeRateApiService } from './exchange-rate.api.service';
 
 @Controller('api/exchange-rate')
@@ -13,11 +19,21 @@ export class ExchangeRateController {
 
   @Get()
   @ApiOperation({ summary: 'Returns exchange rate for currency' })
-  @ApiQuery({ name: 'currencyCode', enum: CurrencyCode })
   @ApiOkResponse({ type: ExchangeRateDto })
+  @ApiBadRequestResponse({
+    description: 'No data found for the given currency code',
+    type: HttpExceptionResponse,
+  })
+  @ApiNotFoundResponse({
+    description: 'Failed to fetch exchange rate for currency for given date',
+    type: HttpExceptionResponse,
+  })
   async getExchangeRateForCurrency(
-    @Query('currencyCode') currencyCode: CurrencyCode,
+    @Query() { currencyCode, iso8601Date }: GetExchangeRateQueryDto,
   ): Promise<ExchangeRateDto> {
-    return this.exchangeRateApiService.getExchangeRateForCurrency(currencyCode);
+    return this.exchangeRateApiService.getExchangeRateForCurrency(
+      currencyCode,
+      iso8601Date,
+    );
   }
 }
