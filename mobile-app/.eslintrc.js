@@ -1,9 +1,19 @@
 // https://docs.expo.dev/guides/using-eslint/
 module.exports = {
-  plugins: ['simple-import-sort', 'unused-imports'],
-  extends: 'expo',
+  plugins: [
+    'prettier',
+    '@typescript-eslint/eslint-plugin',
+    'simple-import-sort',
+    'unused-imports',
+  ],
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+    'expo',
+  ],
   ignorePatterns: ['/dist/*'],
   rules: {
+    'prettier/prettier': 'error',
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
       'warn',
