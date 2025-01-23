@@ -40,13 +40,25 @@ export default function ExchangeRateChecker() {
           selectedCurrency,
           date,
         );
-      setExchangeRateResult({
-        exchangeRate: response.exchangeRateToPln,
-        convertedCurrency: response.currencyCode,
-      });
-      setError(null);
-    } catch (err) {
+
+      if (response.success) {
+        const {
+          data: { exchangeRateToPln, currencyCode },
+        } = response;
+
+        setExchangeRateResult({
+          exchangeRate: exchangeRateToPln,
+          convertedCurrency: currencyCode,
+        });
+
+        setError(null);
+      } else {
+        setExchangeRateResult(undefined);
+        setError(response.message);
+      }
+    } catch (err: unknown) {
       setError('Failed to fetch exchange rate. Please try again.');
+
       setExchangeRateResult(undefined);
     }
   };

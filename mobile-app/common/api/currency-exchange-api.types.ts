@@ -7,7 +7,7 @@ export interface ICurrencyExchangeApiService {
 
   getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
-  ): Promise<ExchangeRateResponse>;
+  ): Promise<ApiResponse<ExchangeRateResponse>>;
 }
 
 export interface LoginResponse {
@@ -25,3 +25,7 @@ export interface ExchangeRateResponse {
 
   exchangeRateDate: string;
 }
+
+export type ApiResponse<T> = SuccessApiResponse<T> | FailedApiResponse;
+export type SuccessApiResponse<T> = { success: true; data: T };
+type FailedApiResponse = { success: false; message: string };
