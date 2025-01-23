@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-import { ICurrencyExchangeApiService, LoginResponse, RegisterResponse } from '@/common/api/currency-exchange-api.types';
+import {
+  ICurrencyExchangeApiService,
+  LoginResponse,
+  RegisterResponse,
+} from '@/common/api/currency-exchange-api.types';
 
 class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
   static readonly BASE_URL = 'http://localhost:3000';
@@ -18,13 +22,21 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
     return CurrencyExchangeApiService.instance;
   }
 
-  public async login(username: string, password: string): Promise<LoginResponse> {
+  public async login(
+    username: string,
+    password: string,
+  ): Promise<LoginResponse> {
     const loginUrl = `${this.baseUrl()}/auth/login`;
 
-    return axios.post<LoginResponse>(loginUrl, { email: username, password }).then((response) => response.data);
+    return axios
+      .post<LoginResponse>(loginUrl, { email: username, password })
+      .then((response) => response.data);
   }
 
-  public async register(username: string, password: string): Promise<RegisterResponse> {
+  public async register(
+    username: string,
+    password: string,
+  ): Promise<RegisterResponse> {
     const registerUrl = `${this.baseUrl()}/api/users`;
 
     return axios
@@ -36,7 +48,9 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
   }
 
   private baseUrl(): string {
-    return process.env.EXPO_PUBLIC_BE_URL || CurrencyExchangeApiService.BASE_URL;
+    return (
+      process.env.EXPO_PUBLIC_BE_URL || CurrencyExchangeApiService.BASE_URL
+    );
   }
 }
 

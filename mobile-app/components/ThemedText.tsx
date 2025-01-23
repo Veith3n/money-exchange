@@ -1,4 +1,10 @@
-import { Text, type TextProps, StyleSheet, TextInput, TextInputProps } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  type TextProps,
+} from 'react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 
@@ -14,7 +20,13 @@ export type ThemedTextInputProps = TextInputProps & {
   type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
 };
 
-export function ThemedText({ style, lightColor, darkColor, type = 'default', ...rest }: ThemedTextProps) {
+export function ThemedText({
+  style,
+  lightColor,
+  darkColor,
+  type = 'default',
+  ...rest
+}: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
   return (
@@ -33,7 +45,13 @@ export function ThemedText({ style, lightColor, darkColor, type = 'default', ...
   );
 }
 
-export function ThemedTextInput({ style, lightColor, darkColor, type = 'default', ...rest }: ThemedTextInputProps) {
+export function ThemedTextInput({
+  style,
+  lightColor,
+  darkColor,
+  type = 'default',
+  ...rest
+}: ThemedTextInputProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
   return (

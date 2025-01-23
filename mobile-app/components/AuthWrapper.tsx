@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { useSession } from '@/app/ctx';
+
 import { ThemedText } from './ThemedText';
 
 interface AuthWrapperProps {
