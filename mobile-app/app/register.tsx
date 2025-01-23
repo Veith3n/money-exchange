@@ -7,6 +7,8 @@ import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.servi
 import { ThemedText, ThemedTextInput } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
+import { ROUTES } from './_layout';
+
 interface RegisterScreenProps {
   navigation: NavigationProp<any>;
 }
@@ -29,7 +31,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       //   TODO: handle case when in the be response account with given email already exists
       await currencyExchangeApiService.register(email, password);
 
-      router.push('/HomeScreen');
+      router.push(ROUTES.HOME);
       // navigation.navigate('HomeScreen');
     } catch (error: unknown) {
       setErrorMessage('Registration failed. Please try again.');
@@ -67,7 +69,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       <Button title="Register" onPress={handleRegister} />
 
       <ThemedText
-        onPress={() => router.push('/login')}
+        onPress={() => router.push(ROUTES.LOGIN)}
         style={styles.switchText}
       >
         Already have an account? Login

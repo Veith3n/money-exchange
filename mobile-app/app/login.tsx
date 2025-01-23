@@ -7,6 +7,7 @@ import { ThemedText, ThemedTextInput } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 import { useSession } from './ctx';
+import { ROUTES } from './_layout';
 
 interface LoginScreenProps {
   navigation: NavigationProp<any>;
@@ -23,7 +24,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     try {
       await signIn(username, password);
 
-      router.push('/HomeScreen');
+      router.push(ROUTES.TABS);
       // navigation.navigate('HomeScreen');
     } catch (error) {
       setErrorMessage(
@@ -53,7 +54,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       )}
       <Button title="Login" onPress={handleLogin} />
       <ThemedText
-        onPress={() => router.push('/register')}
+        onPress={() => router.push(ROUTES.REGISTER)}
         style={styles.switchText}
       >
         Don't have an account? Register
