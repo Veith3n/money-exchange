@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Button, StyleSheet, View } from 'react-native';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
 import RNPickerSelect from 'react-native-picker-select';
 
 import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.service';
@@ -22,6 +24,8 @@ export default function ExchangeRateChecker() {
   >(undefined);
 
   const [error, setError] = useState<string | null>(null);
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [open, setOpen] = useState(false);
 
   const currencyExchangeApiService = CurrencyExchangeApiService.getInstance();
   const currencies = Object.values(CurrencyCode).map((currency) => ({
@@ -34,6 +38,7 @@ export default function ExchangeRateChecker() {
       const response =
         await currencyExchangeApiService.getExchangeRateForCurrency(
           selectedCurrency,
+          date,
         );
       setExchangeRateResult({
         exchangeRate: response.exchangeRateToPln,
@@ -47,27 +52,66 @@ export default function ExchangeRateChecker() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>Select a currency:</ThemedText>
+    <PaperProvider>
+      <ThemedView style={styles.container}>
+        <ThemedText style={styles.title}>Select a currency:</ThemedText>
 
-      <CurrencyPicker
-        currencies={currencies}
-        setSelectedCurrency={setSelectedCurrency}
-        selectedCurrency={selectedCurrency}
-      />
+        <CurrencyPicker
+          currencies={currencies}
+          setSelectedCurrency={setSelectedCurrency}
+          selectedCurrency={selectedCurrency}
+        />
 
-      <View style={styles.buttonContainer}>
-        <Button title="Check Exchange Rate" onPress={handleCheckExchangeRate} />
-      </View>
+        <View style={styles.datePickerContainer}>
+          <Button title="Select Date" onPress={() => setOpen(true)} />
 
-      {exchangeRateResult && (
-        <ExchangeRateResultText exchangeRateResult={exchangeRateResult} />
-      )}
+          <ThemedText style={styles.dateText}>
+            {date ? `Date: ${date.toDateString()}` : 'Will use current date'}
+          </ThemedText>
 
-      {error && <ThemedText style={styles.error}>{error}</ThemedText>}
-    </ThemedView>
+          <DatePicker open={open} setOpen={setOpen} setDate={setDate} />
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Check Exchange Rate"
+            onPress={handleCheckExchangeRate}
+          />
+        </View>
+
+        {exchangeRateResult && (
+          <ExchangeRateResultText exchangeRateResult={exchangeRateResult} />
+        )}
+
+        {error && <ThemedText style={styles.error}>{error}</ThemedText>}
+      </ThemedView>
+    </PaperProvider>
   );
 }
+
+const DatePicker = ({
+  open,
+  setOpen,
+  setDate,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  setDate: (date?: Date) => void;
+}) => {
+  return (
+    <DatePickerModal
+      mode="single"
+      visible={open}
+      onDismiss={() => setOpen(false)}
+      date={new Date()}
+      locale="en-GB"
+      onConfirm={(params) => {
+        setDate(params.date);
+        setOpen(false);
+      }}
+    />
+  );
+};
 
 const ExchangeRateResultText = ({
   exchangeRateResult,
@@ -133,6 +177,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 18,
     textAlign: 'center',
+  },
+  datePickerContainer: {
+    marginVertical: 16,
+    alignItems: 'center',
+  },
+  dateText: {
+    marginTop: 10,
   },
 });
 
