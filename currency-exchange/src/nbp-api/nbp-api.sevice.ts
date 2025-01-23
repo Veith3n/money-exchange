@@ -28,28 +28,15 @@ export class NbpApiService {
     currencyCode: CurrencyCode,
     date?: string,
   ): Promise<ExchangeRateResponseDto> {
-    const getExchangeRateForCurrency = async (
-      currencyCode: CurrencyCode,
-      table: string,
-    ): Promise<ApiResponse<ExchangeRateResponseDto>> => {
-      const baseUrl = `${this.BASE_URL}/${table}/${currencyCode}/`;
-
-      // If the date is provided, append it to the URL so we fetch date for that specific day
-      const endpointUrl = date ? `${baseUrl}/${date}/` : baseUrl;
-
-      return axios
-        .get<ExchangeRateResponseDto>(endpointUrl)
-        .then((response) => this.handleSuccessResponse(response))
-        .catch((error: AxiosError) =>
-          this.handleErrorResponse(error, table, date),
-        );
-    };
-
     const responses: FailedApiResponse[] = [];
 
     for (const table of this.TABLES) {
       try {
-        const response = await getExchangeRateForCurrency(currencyCode, table);
+        const response = await this.fetchExchangeRateForCurrency(
+          currencyCode,
+          table,
+          date,
+        );
 
         if (response.success) {
           return response.data;
@@ -66,9 +53,7 @@ export class NbpApiService {
       }
     }
 
-    const noDataFound =
-      responses.filter((response) => !response.success && response.message)
-        .length == this.TABLES.length;
+    const noDataFound = responses.length === this.TABLES.length;
 
     if (noDataFound) {
       throw new HttpException(
@@ -77,11 +62,28 @@ export class NbpApiService {
       );
     }
 
-    // If all requests fail, throw an exception
     throw new HttpException(
       `Failed to fetch exchange rate for currency ${currencyCode} from all tables`,
       HttpStatus.BAD_REQUEST,
     );
+  }
+
+  private async fetchExchangeRateForCurrency(
+    currencyCode: CurrencyCode,
+    table: string,
+    date?: string,
+  ): Promise<ApiResponse<ExchangeRateResponseDto>> {
+    const baseUrl = `${this.BASE_URL}/${table}/${currencyCode}/`;
+
+    // If the date is provided, append it to the URL so we fetch date for that specific day
+    const endpointUrl = date ? `${baseUrl}/${date}/` : baseUrl;
+
+    return axios
+      .get<ExchangeRateResponseDto>(endpointUrl)
+      .then((response) => this.handleSuccessResponse(response))
+      .catch((error: AxiosError) =>
+        this.handleErrorResponse(error, table, date),
+      );
   }
 
   private handleSuccessResponse<T>(
