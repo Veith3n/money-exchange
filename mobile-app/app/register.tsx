@@ -1,11 +1,11 @@
+import { NavigationProp } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Button, StyleSheet } from 'react-native';
 
-import { NavigationProp } from '@react-navigation/native';
+import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.service';
 import { ThemedText, ThemedTextInput } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useRouter } from 'expo-router';
-import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.service';
 
 interface RegisterScreenProps {
   navigation: NavigationProp<any>;
@@ -40,7 +40,12 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedTextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} />
+      <ThemedTextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
       <ThemedTextInput
         style={styles.input}
         placeholder="Password"
@@ -55,11 +60,16 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
         onChangeText={setConfirmPassword}
         secureTextEntry
       />
-      {errorMessage && <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>}
+      {errorMessage && (
+        <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
+      )}
 
       <Button title="Register" onPress={handleRegister} />
 
-      <ThemedText onPress={() => router.push('/login')} style={styles.switchText}>
+      <ThemedText
+        onPress={() => router.push('/login')}
+        style={styles.switchText}
+      >
         Already have an account? Login
       </ThemedText>
     </ThemedView>

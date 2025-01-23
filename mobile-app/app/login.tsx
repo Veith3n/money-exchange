@@ -1,11 +1,12 @@
+import { NavigationProp } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Button, StyleSheet } from 'react-native';
 
-import { NavigationProp } from '@react-navigation/native';
 import { ThemedText, ThemedTextInput } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+
 import { useSession } from './ctx';
-import { useRouter } from 'expo-router';
 
 interface LoginScreenProps {
   navigation: NavigationProp<any>;
@@ -25,14 +26,21 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       router.push('/HomeScreen');
       // navigation.navigate('HomeScreen');
     } catch (error) {
-      setErrorMessage('Login failed. Please check your credentials and try again.');
+      setErrorMessage(
+        'Login failed. Please check your credentials and try again.',
+      );
       console.error('Login failed', error);
     }
   };
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedTextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
+      <ThemedTextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+      />
       <ThemedTextInput
         style={styles.input}
         placeholder="Password"
@@ -40,9 +48,14 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         onChangeText={setPassword}
         secureTextEntry
       />
-      {errorMessage && <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>}
+      {errorMessage && (
+        <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
+      )}
       <Button title="Login" onPress={handleLogin} />
-      <ThemedText onPress={() => router.push('/register')} style={styles.switchText}>
+      <ThemedText
+        onPress={() => router.push('/register')}
+        style={styles.switchText}
+      >
         Don't have an account? Register
       </ThemedText>
     </ThemedView>
