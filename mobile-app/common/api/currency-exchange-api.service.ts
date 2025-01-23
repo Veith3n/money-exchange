@@ -51,11 +51,15 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
 
   public async getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
+    date?: Date,
   ): Promise<ExchangeRateResponse> {
     const exchangeRateUrl = `${this.baseUrl()}/api/exchange-rate`;
+    const iso8601Date = date ? date.toISOString().split('T')[0] : undefined;
 
     return axios
-      .get<ExchangeRateResponse>(exchangeRateUrl, { params: { currencyCode } })
+      .get<ExchangeRateResponse>(exchangeRateUrl, {
+        params: { currencyCode, iso8601Date },
+      })
       .then((response) => response.data);
   }
 
