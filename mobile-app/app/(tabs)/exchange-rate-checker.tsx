@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, StyleSheet } from 'react-native';
+import { Button, StyleSheet, View } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 
 import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.service';
@@ -48,7 +48,7 @@ export default function ExchangeRateChecker() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText>Select a currency:</ThemedText>
+      <ThemedText style={styles.title}>Select a currency:</ThemedText>
 
       <CurrencyPicker
         currencies={currencies}
@@ -56,9 +56,13 @@ export default function ExchangeRateChecker() {
         selectedCurrency={selectedCurrency}
       />
 
-      <Button title="Check Exchange Rate" onPress={handleCheckExchangeRate} />
+      <View style={styles.buttonContainer}>
+        <Button title="Check Exchange Rate" onPress={handleCheckExchangeRate} />
+      </View>
 
-      {exchangeRateResult && ExchangeRateResultText({ exchangeRateResult })}
+      {exchangeRateResult && (
+        <ExchangeRateResultText exchangeRateResult={exchangeRateResult} />
+      )}
 
       {error && <ThemedText style={styles.error}>{error}</ThemedText>}
     </ThemedView>
@@ -108,21 +112,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
   },
-  picker: {
-    height: 50,
-    width: 200,
-    marginVertical: 20,
+  title: {
+    fontSize: 18,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    marginTop: 20,
+    width: '80%',
   },
   result: {
     marginTop: 20,
     fontSize: 18,
+    textAlign: 'center',
   },
   error: {
     marginTop: 20,
     fontSize: 18,
-    color: 'red',
+    textAlign: 'center',
   },
 });
 
@@ -135,14 +145,18 @@ const pickerSelectStyles = StyleSheet.create({
     borderColor: 'gray',
     borderRadius: 4,
     paddingRight: 30, // to ensure the text is never behind the icon
+    width: '80%',
+    alignSelf: 'center',
   },
   inputAndroid: {
     fontSize: 16,
+    paddingVertical: 12,
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 0.5,
-    borderColor: 'purple',
-    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 4,
     paddingRight: 30, // to ensure the text is never behind the icon
+    width: '80%',
+    alignSelf: 'center',
   },
 });
