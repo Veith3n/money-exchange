@@ -5,6 +5,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.service';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { CurrencyCode } from '@/types/currency-codes.enum';
 
 interface ExchangeRateResult {
@@ -48,29 +49,60 @@ export default function ExchangeRateChecker() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText>Select a currency:</ThemedText>
-      <RNPickerSelect
-        onValueChange={(itemValue: CurrencyCode) =>
-          itemValue && setSelectedCurrency(itemValue)
-        }
-        items={currencies}
-        style={{
-          inputAndroid: { ...pickerSelectStyles.inputAndroid },
-          inputIOS: { ...pickerSelectStyles.inputIOS },
-        }}
-        value={selectedCurrency}
+
+      <CurrencyPicker
+        currencies={currencies}
+        setSelectedCurrency={setSelectedCurrency}
+        selectedCurrency={selectedCurrency}
       />
 
       <Button title="Check Exchange Rate" onPress={handleCheckExchangeRate} />
-      {exchangeRateResult && (
-        <ThemedText style={styles.result}>
-          Exchange Rate: 1 {exchangeRateResult.convertedCurrency} ={' '}
-          {exchangeRateResult.exchangeRate} PLN
-        </ThemedText>
-      )}
+
+      {exchangeRateResult && ExchangeRateResultText({ exchangeRateResult })}
+
       {error && <ThemedText style={styles.error}>{error}</ThemedText>}
     </ThemedView>
   );
 }
+
+const ExchangeRateResultText = ({
+  exchangeRateResult,
+}: {
+  exchangeRateResult: ExchangeRateResult;
+}) => {
+  return (
+    <ThemedText style={styles.result}>
+      Exchange Rate: 1 {exchangeRateResult.convertedCurrency} ={' '}
+      {exchangeRateResult.exchangeRate} PLN
+    </ThemedText>
+  );
+};
+
+const CurrencyPicker = ({
+  currencies,
+  setSelectedCurrency,
+  selectedCurrency,
+}: {
+  currencies: { label: string; value: CurrencyCode }[];
+  setSelectedCurrency: (currency: CurrencyCode) => void;
+  selectedCurrency: CurrencyCode;
+}) => {
+  const textColor = useThemeColor({}, 'text');
+
+  return (
+    <RNPickerSelect
+      onValueChange={(itemValue: CurrencyCode) =>
+        itemValue && setSelectedCurrency(itemValue)
+      }
+      items={currencies}
+      style={{
+        inputAndroid: { ...pickerSelectStyles.inputAndroid, color: textColor },
+        inputIOS: { ...pickerSelectStyles.inputIOS, color: textColor },
+      }}
+      value={selectedCurrency}
+    />
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
