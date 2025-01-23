@@ -1,3 +1,4 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
@@ -44,6 +45,15 @@ export default function TabLayout() {
             title: 'Explore',
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="paperplane.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="exchange-rate-checker"
+          options={{
+            title: 'Exchange rate checker',
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="currency-exchange" size={28} color={color} />
             ),
           }}
         />
