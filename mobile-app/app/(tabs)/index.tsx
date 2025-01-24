@@ -12,9 +12,13 @@ import { CurrencyCode } from '@/types/currency-codes.enum';
 export default function Wallets() {
   const [wallets, setWallets] = useState<WalletDto[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [topUpModalVisible, setTopUpModalVisible] = useState(false);
+  const [sellModalVisible, setSellModalVisible] = useState(false);
+  const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState<WalletDto | null>(null);
   const [topUpAmount, setTopUpAmount] = useState('');
+  const [sellAmount, setSellAmount] = useState('');
+  const [buyAmount, setBuyAmount] = useState('');
   const { session } = useSession();
 
   const currencyExchangeApiService = CurrencyExchangeApiService.getInstance();
@@ -49,7 +53,7 @@ export default function Wallets() {
           selectedWallet.currencyCode,
           parseFloat(topUpAmount),
         );
-        setModalVisible(false);
+        setTopUpModalVisible(false);
         setTopUpAmount('');
 
         // Refresh wallets
@@ -64,13 +68,23 @@ export default function Wallets() {
     }
   };
 
+  const handleSell = async () => {};
+  const handleBuy = async () => {};
+
   const renderWallet = ({ item: wallet }: { item: WalletDto }) => {
     const handleWalletTopUpPress = (wallet: WalletDto) => {
       setSelectedWallet(wallet);
-      setModalVisible(true);
+      setTopUpModalVisible(true);
     };
-    const handleWalletSellPress = (wallet: WalletDto) => {};
-    const handleWalletBuyPress = (wallet: WalletDto) => {};
+    const handleWalletSellPress = (wallet: WalletDto) => {
+      setSelectedWallet(wallet);
+      setSellModalVisible(true);
+    };
+    const handleWalletBuyPress = (wallet: WalletDto) => {
+      setSelectedWallet(wallet);
+      setBuyModalVisible(true);
+    };
+
     const buyButtonEnabled = wallets.some(
       (wallet) => wallet.currencyCode === CurrencyCode.PLN,
     );
@@ -102,11 +116,29 @@ export default function Wallets() {
 
         <TopUpModal
           handleTopUp={handleTopUp}
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
+          modalVisible={topUpModalVisible}
+          setModalVisible={setTopUpModalVisible}
           selectedWallet={selectedWallet}
           setTopUpAmount={setTopUpAmount}
           topUpAmount={topUpAmount}
+        />
+
+        <BuyModal
+          handleTopUp={handleBuy}
+          modalVisible={buyModalVisible}
+          setModalVisible={setBuyModalVisible}
+          selectedWallet={selectedWallet}
+          setBuyAmount={setBuyAmount}
+          buyAmount={buyAmount}
+        />
+
+        <SellModal
+          handleTopUp={handleSell}
+          modalVisible={sellModalVisible}
+          setModalVisible={setSellModalVisible}
+          selectedWallet={selectedWallet}
+          setSellAmount={setSellAmount}
+          sellAmount={sellAmount}
         />
       </ThemedView>
     </PaperProvider>
@@ -155,6 +187,64 @@ const WalletItem = ({
   );
 };
 
+const SellModal = ({
+  modalVisible,
+  setModalVisible,
+  selectedWallet,
+  sellAmount,
+  setSellAmount,
+  handleTopUp,
+}: {
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+  selectedWallet: WalletDto | null;
+  sellAmount: string;
+  setSellAmount: (amount: string) => void;
+  handleTopUp: () => void;
+}) => {
+  return (
+    <WalletModal
+      handleAction={handleTopUp}
+      actionLabel="Confirm"
+      title="Sell"
+      modalVisible={modalVisible}
+      setModalVisible={setModalVisible}
+      selectedWallet={selectedWallet}
+      amount={sellAmount}
+      setAmount={setSellAmount}
+    />
+  );
+};
+
+const BuyModal = ({
+  modalVisible,
+  setModalVisible,
+  selectedWallet,
+  buyAmount,
+  setBuyAmount,
+  handleTopUp,
+}: {
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+  selectedWallet: WalletDto | null;
+  buyAmount: string;
+  setBuyAmount: (amount: string) => void;
+  handleTopUp: () => void;
+}) => {
+  return (
+    <WalletModal
+      handleAction={handleTopUp}
+      actionLabel="Confirm"
+      title="Buy"
+      modalVisible={modalVisible}
+      setModalVisible={setModalVisible}
+      selectedWallet={selectedWallet}
+      amount={buyAmount}
+      setAmount={setBuyAmount}
+    />
+  );
+};
+
 const TopUpModal = ({
   modalVisible,
   setModalVisible,
@@ -171,6 +261,39 @@ const TopUpModal = ({
   handleTopUp: () => void;
 }) => {
   return (
+    <WalletModal
+      handleAction={handleTopUp}
+      actionLabel="Confirm"
+      title="Top Up"
+      modalVisible={modalVisible}
+      setModalVisible={setModalVisible}
+      selectedWallet={selectedWallet}
+      amount={topUpAmount}
+      setAmount={setTopUpAmount}
+    />
+  );
+};
+
+const WalletModal = ({
+  modalVisible,
+  setModalVisible,
+  selectedWallet,
+  amount,
+  setAmount,
+  handleAction,
+  actionLabel,
+  title,
+}: {
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+  selectedWallet: WalletDto | null;
+  amount: string;
+  setAmount: (amount: string) => void;
+  handleAction: () => void;
+  actionLabel: string;
+  title: string;
+}) => {
+  return (
     <Modal
       visible={modalVisible}
       transparent={true}
@@ -180,18 +303,18 @@ const TopUpModal = ({
       <ThemedView style={styles.modalContainer}>
         <ThemedView style={styles.modalContent}>
           <ThemedText style={styles.modalTitle}>
-            Top Up {selectedWallet?.currencyCode}
+            {title} {selectedWallet?.currencyCode}
           </ThemedText>
           <ThemedTextInput
             style={styles.input}
             placeholder="Enter amount"
             keyboardType="numeric"
-            value={topUpAmount}
-            onChangeText={setTopUpAmount}
+            value={amount}
+            onChangeText={setAmount}
           />
           <View style={styles.modalButtons}>
-            <Button mode="contained" onPress={handleTopUp}>
-              Confirm
+            <Button mode="contained" onPress={handleAction}>
+              {actionLabel}
             </Button>
             <Button mode="outlined" onPress={() => setModalVisible(false)}>
               Cancel
