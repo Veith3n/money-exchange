@@ -68,9 +68,16 @@ export default function Wallets() {
       setSelectedWallet(wallet);
       setModalVisible(true);
     };
+    const handleWalletSellPress = (wallet: WalletDto) => {};
+    const handleWalletBuyPress = (wallet: WalletDto) => {};
 
     return (
-      <WalletItem wallet={wallet} onWalletTopUpPress={handleWalletTopUpPress} />
+      <WalletItem
+        wallet={wallet}
+        onWalletTopUpPress={handleWalletTopUpPress}
+        onWalletBuyPress={handleWalletBuyPress}
+        onWalletSellPress={handleWalletSellPress}
+      />
     );
   };
 
@@ -104,21 +111,35 @@ export default function Wallets() {
 const WalletItem = ({
   wallet,
   onWalletTopUpPress,
+  onWalletBuyPress,
+  onWalletSellPress,
 }: {
   wallet: WalletDto;
   onWalletTopUpPress: (wallet: WalletDto) => void;
+  onWalletSellPress: (wallet: WalletDto) => void;
+  onWalletBuyPress: (wallet: WalletDto) => void;
 }) => {
   return (
     <View style={styles.walletItem}>
-      <ThemedText style={styles.walletCurrency}>
-        {wallet.currencyCode}
-      </ThemedText>
-      <ThemedText style={styles.walletBalance}>
-        Balance: {parseFloat(wallet.balance).toFixed(2)}
-      </ThemedText>
-      <Button mode="contained" onPress={() => onWalletTopUpPress(wallet)}>
-        Top Up
-      </Button>
+      <View style={styles.walletInfo}>
+        <ThemedText style={styles.walletCurrency}>
+          {wallet.currencyCode}
+        </ThemedText>
+        <ThemedText style={styles.walletBalance}>
+          Balance: {parseFloat(wallet.balance).toFixed(2)}
+        </ThemedText>
+      </View>
+      <View style={styles.walletButtons}>
+        <Button mode="contained" onPress={() => onWalletSellPress(wallet)}>
+          Sell
+        </Button>
+        <Button mode="contained" onPress={() => onWalletBuyPress(wallet)}>
+          Buy
+        </Button>
+        <Button mode="contained" onPress={() => onWalletTopUpPress(wallet)}>
+          Top Up
+        </Button>
+      </View>
     </View>
   );
 };
@@ -199,12 +220,14 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   walletItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+  walletInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
   walletCurrency: {
     fontSize: 16,
@@ -212,6 +235,10 @@ const styles = StyleSheet.create({
   },
   walletBalance: {
     fontSize: 16,
+  },
+  walletButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   modalContainer: {
     flex: 1,
