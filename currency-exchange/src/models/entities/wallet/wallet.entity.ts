@@ -45,4 +45,10 @@ export class Wallet {
 
     this.balance = (currentBalance + amount).toString();
   }
+
+  public withdraw(amount: number): void {
+    const currentBalance = parseFloat(this.balance);
+
+    this.balance = (currentBalance - amount).toString();
+  }
 }
