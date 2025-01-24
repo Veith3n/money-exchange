@@ -41,3 +41,12 @@ export class Swap {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }
+
+export interface SwapCreateDto {
+  userId: number;
+  boughtCurrencyCode: CurrencyCode;
+  boughtCurrencyValue: number;
+  soldCurrencyCode: CurrencyCode;
+  soldCurrencyValue: number;
+  exchangeRate: number;
+}

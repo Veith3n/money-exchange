@@ -3,6 +3,7 @@ import { ExchangeRateResponseDto } from 'src/nbp-api/dto/exchange-rate-response.
 import { NbpApiService } from 'src/nbp-api/nbp-api.sevice';
 import { CurrencyCode } from 'src/types/currency-codes.enum';
 
+import { SwapService } from '../../models/entities/swap/swap.service';
 import { WalletService } from '../../models/entities/wallet/wallet.service';
 import { ExchangeRateDto } from './dto/exchange-rate.dto';
 import {
@@ -15,6 +16,7 @@ export class ExchangeRateApiService {
   constructor(
     private readonly nbpApiService: NbpApiService,
     private readonly walletService: WalletService,
+    private readonly swapService: SwapService,
   ) {}
 
   public async exchangePlnToCurrency({
@@ -42,7 +44,7 @@ export class ExchangeRateApiService {
     const exchangeRate =
       await this.getExchangeRateForCurrency(otherCurrencyCode);
 
-    const amountOfCurrency = amountOfPln / exchangeRate.exchangeRateToPln;
+    const amountOfOtherCurrency = amountOfPln / exchangeRate.exchangeRateToPln;
 
     const otherCurrencyWallet =
       await this.walletService.findOrCreateForUserAndCurrencyCode(
@@ -50,10 +52,19 @@ export class ExchangeRateApiService {
         otherCurrencyCode,
       );
 
-    otherCurrencyWallet.topUp(amountOfCurrency);
+    otherCurrencyWallet.topUp(amountOfOtherCurrency);
     plnWallet.withdraw(amountOfPln);
 
     await this.walletService.saveAll([plnWallet, otherCurrencyWallet]);
+
+    await this.swapService.create({
+      userId,
+      boughtCurrencyCode: otherCurrencyCode,
+      boughtCurrencyValue: amountOfOtherCurrency,
+      soldCurrencyCode: CurrencyCode.PLN,
+      soldCurrencyValue: amountOfPln,
+      exchangeRate: exchangeRate.exchangeRateToPln,
+    });
   }
 
   public async getExchangeRateForCurrency(
