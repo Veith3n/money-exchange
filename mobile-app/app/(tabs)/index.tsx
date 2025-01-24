@@ -68,8 +68,49 @@ export default function Wallets() {
     }
   };
 
-  const handleSell = async () => {};
-  const handleBuy = async () => {};
+  const handleSell = async () => {
+    if (selectedWallet && sellAmount && session?.accessToken) {
+      try {
+        await currencyExchangeApiService.buyPln(session.accessToken, {
+          amountOfOtherCurrency: parseFloat(sellAmount),
+          otherCurrencyCode: selectedWallet.currencyCode,
+        });
+        setSellModalVisible(false);
+        setSellAmount('');
+
+        // Refresh wallets
+        const wallets = await currencyExchangeApiService.getWallets(
+          session?.accessToken || '',
+        );
+
+        setWallets(sortWallets(wallets));
+      } catch (err: unknown) {
+        setError('Failed to sell currency. Please try again.');
+      }
+    }
+  };
+
+  const handleBuy = async () => {
+    if (selectedWallet && buyAmount && session?.accessToken) {
+      try {
+        await currencyExchangeApiService.sellPln(session.accessToken, {
+          amountOfPln: parseFloat(buyAmount),
+          otherCurrencyCode: selectedWallet.currencyCode,
+        });
+        setBuyModalVisible(false);
+        setBuyAmount('');
+
+        // Refresh wallets
+        const wallets = await currencyExchangeApiService.getWallets(
+          session?.accessToken || '',
+        );
+
+        setWallets(sortWallets(wallets));
+      } catch (err: unknown) {
+        setError('Failed to buy currency. Please try again.');
+      }
+    }
+  };
 
   const renderWallet = ({ item: wallet }: { item: WalletDto }) => {
     const handleWalletTopUpPress = (wallet: WalletDto) => {
@@ -158,6 +199,8 @@ const WalletItem = ({
   onWalletBuyPress: (wallet: WalletDto) => void;
   buyButtonDisabled: boolean;
 }) => {
+  const isPln = wallet.currencyCode === CurrencyCode.PLN;
+
   return (
     <View style={styles.walletItem}>
       <View style={styles.walletInfo}>
@@ -169,13 +212,17 @@ const WalletItem = ({
         </ThemedText>
       </View>
       <View style={styles.walletButtons}>
-        <Button mode="contained" onPress={() => onWalletSellPress(wallet)}>
+        <Button
+          mode="contained"
+          onPress={() => onWalletSellPress(wallet)}
+          disabled={isPln}
+        >
           Sell
         </Button>
         <Button
           mode="contained"
           onPress={() => onWalletBuyPress(wallet)}
-          disabled={buyButtonDisabled}
+          disabled={buyButtonDisabled || isPln}
         >
           Buy
         </Button>
@@ -207,6 +254,7 @@ const SellModal = ({
       handleAction={handleTopUp}
       actionLabel="Confirm"
       title="Sell"
+      subtitle="to PLN"
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
       selectedWallet={selectedWallet}
@@ -236,6 +284,7 @@ const BuyModal = ({
       handleAction={handleTopUp}
       actionLabel="Confirm"
       title="Buy"
+      subtitle="for given amount of PLN"
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
       selectedWallet={selectedWallet}
@@ -283,6 +332,7 @@ const WalletModal = ({
   handleAction,
   actionLabel,
   title,
+  subtitle,
 }: {
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
@@ -292,6 +342,7 @@ const WalletModal = ({
   handleAction: () => void;
   actionLabel: string;
   title: string;
+  subtitle?: string;
 }) => {
   return (
     <Modal
@@ -303,7 +354,7 @@ const WalletModal = ({
       <ThemedView style={styles.modalContainer}>
         <ThemedView style={styles.modalContent}>
           <ThemedText style={styles.modalTitle}>
-            {title} {selectedWallet?.currencyCode}
+            {title} {selectedWallet?.currencyCode} {subtitle}
           </ThemedText>
           <ThemedTextInput
             style={styles.input}
