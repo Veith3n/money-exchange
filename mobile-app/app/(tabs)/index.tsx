@@ -114,7 +114,7 @@ const WalletItem = ({
         {wallet.currencyCode}
       </ThemedText>
       <ThemedText style={styles.walletBalance}>
-        Balance: {wallet.balance}
+        Balance: {parseFloat(wallet.balance).toFixed(2)}
       </ThemedText>
       <Button mode="contained" onPress={() => onWalletTopUpPress(wallet)}>
         Top Up
