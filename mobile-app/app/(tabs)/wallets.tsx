@@ -41,21 +41,21 @@ export default function Wallets() {
   }, [session, currencyExchangeApiService]);
 
   const handleTopUp = async () => {
-    console.log('hit');
-    console.log(session?.accessToken);
     if (selectedWallet && topUpAmount && session?.accessToken) {
       try {
         await currencyExchangeApiService.topUpWallet(
-          session?.accessToken,
+          session.accessToken,
           selectedWallet.currencyCode,
           parseFloat(topUpAmount),
         );
         setModalVisible(false);
         setTopUpAmount('');
+
         // Refresh wallets
         const wallets = await currencyExchangeApiService.getWallets(
           session?.accessToken || '',
         );
+
         setWallets(sortWallets(wallets));
       } catch (err: unknown) {
         setError('Failed to top up wallet. Please try again.');
@@ -63,23 +63,16 @@ export default function Wallets() {
     }
   };
 
-  const renderItem = ({ item }: { item: WalletDto }) => (
-    <View style={styles.walletItem}>
-      <ThemedText style={styles.walletCurrency}>{item.currencyCode}</ThemedText>
-      <ThemedText style={styles.walletBalance}>
-        Balance: {item.balance}
-      </ThemedText>
-      <Button
-        mode="contained"
-        onPress={() => {
-          setSelectedWallet(item);
-          setModalVisible(true);
-        }}
-      >
-        Top Up
-      </Button>
-    </View>
-  );
+  const renderWallet = ({ item: wallet }: { item: WalletDto }) => {
+    const handleWalletTopUpPress = (wallet: WalletDto) => {
+      setSelectedWallet(wallet);
+      setModalVisible(true);
+    };
+
+    return (
+      <WalletItem wallet={wallet} onWalletTopUpPress={handleWalletTopUpPress} />
+    );
+  };
 
   return (
     <PaperProvider>
@@ -90,44 +83,93 @@ export default function Wallets() {
 
         <FlatList
           data={wallets}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.currencyCode}
+          renderItem={renderWallet}
+          keyExtractor={(wallet) => wallet.currencyCode}
           contentContainerStyle={styles.list}
         />
 
-        <Modal
-          visible={modalVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <ThemedView style={styles.modalContainer}>
-            <ThemedView style={styles.modalContent}>
-              <ThemedText style={styles.modalTitle}>
-                Top Up {selectedWallet?.currencyCode}
-              </ThemedText>
-              <ThemedTextInput
-                style={styles.input}
-                placeholder="Enter amount"
-                keyboardType="numeric"
-                value={topUpAmount}
-                onChangeText={setTopUpAmount}
-              />
-              <View style={styles.modalButtons}>
-                <Button mode="contained" onPress={handleTopUp}>
-                  Confirm
-                </Button>
-                <Button mode="outlined" onPress={() => setModalVisible(false)}>
-                  Cancel
-                </Button>
-              </View>
-            </ThemedView>
-          </ThemedView>
-        </Modal>
+        <TopUpModal
+          handleTopUp={handleTopUp}
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          selectedWallet={selectedWallet}
+          setTopUpAmount={setTopUpAmount}
+          topUpAmount={topUpAmount}
+        />
       </ThemedView>
     </PaperProvider>
   );
 }
+
+const WalletItem = ({
+  wallet,
+  onWalletTopUpPress,
+}: {
+  wallet: WalletDto;
+  onWalletTopUpPress: (wallet: WalletDto) => void;
+}) => {
+  return (
+    <View style={styles.walletItem}>
+      <ThemedText style={styles.walletCurrency}>
+        {wallet.currencyCode}
+      </ThemedText>
+      <ThemedText style={styles.walletBalance}>
+        Balance: {wallet.balance}
+      </ThemedText>
+      <Button mode="contained" onPress={() => onWalletTopUpPress(wallet)}>
+        Top Up
+      </Button>
+    </View>
+  );
+};
+
+const TopUpModal = ({
+  modalVisible,
+  setModalVisible,
+  selectedWallet,
+  topUpAmount,
+  setTopUpAmount,
+  handleTopUp,
+}: {
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+  selectedWallet: WalletDto | null;
+  topUpAmount: string;
+  setTopUpAmount: (amount: string) => void;
+  handleTopUp: () => void;
+}) => {
+  return (
+    <Modal
+      visible={modalVisible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <ThemedView style={styles.modalContainer}>
+        <ThemedView style={styles.modalContent}>
+          <ThemedText style={styles.modalTitle}>
+            Top Up {selectedWallet?.currencyCode}
+          </ThemedText>
+          <ThemedTextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            keyboardType="numeric"
+            value={topUpAmount}
+            onChangeText={setTopUpAmount}
+          />
+          <View style={styles.modalButtons}>
+            <Button mode="contained" onPress={handleTopUp}>
+              Confirm
+            </Button>
+            <Button mode="outlined" onPress={() => setModalVisible(false)}>
+              Cancel
+            </Button>
+          </View>
+        </ThemedView>
+      </ThemedView>
+    </Modal>
+  );
+};
 
 const sortWallets = (wallets: WalletDto[]) =>
   wallets.sort((a, b) => {
