@@ -49,6 +49,15 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="wallets"
+          options={{
+            title: 'Wallets',
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="wallet" size={28} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="exchange-rate-checker"
           options={{
             title: 'Exchange rate checker',
