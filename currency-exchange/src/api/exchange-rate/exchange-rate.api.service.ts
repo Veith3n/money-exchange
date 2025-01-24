@@ -36,6 +36,19 @@ export class ExchangeRateApiService {
     });
   }
 
+  public async exchangeCurrencyToPln({
+    userId,
+    otherCurrencyCode,
+    amountOfOtherCurrency,
+  }): Promise<void> {
+    return this.exchangeFirstCurrencyToSecondCurrency({
+      currencyToBeSold: otherCurrencyCode,
+      currencyToBought: CurrencyCode.PLN,
+      userId,
+      amountOfCurrencyToBeSold: amountOfOtherCurrency,
+    });
+  }
+
   public async getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
     iso8601Date?: string,

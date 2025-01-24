@@ -22,6 +22,7 @@ import { JwtUser } from '../../auth/jwt.strategy';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { UserFromBearer } from '../../decorators/user-from-request';
 import { HttpExceptionResponse as HttpExceptionResponseDto } from '../dto/http-exception-response';
+import { ExchangeCurrencyToPlnDto } from './dto/exchange-currency-to-pln.dto';
 import { ExchangePlnToCurrencyDto } from './dto/exchange-pln-to-currency.dto';
 import { ExchangeRateDto } from './dto/exchange-rate.dto';
 import { GetExchangeRateQueryDto } from './dto/get-exchange-rate-query.dto';
@@ -62,6 +63,7 @@ export class ExchangeRateController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Exchanges PLN to provided currency' })
   @ApiCreatedResponse()
+  @ApiBadRequestResponse()
   @ApiNotAcceptableResponse({ type: HttpExceptionResponseDto })
   async exchangePlnToCurrency(
     @Body() body: ExchangePlnToCurrencyDto,
@@ -69,6 +71,34 @@ export class ExchangeRateController {
   ): Promise<void> {
     try {
       await this.exchangeRateApiService.exchangePlnToCurrency({
+        ...body,
+        userId: user.userId,
+      });
+    } catch (error) {
+      if (error instanceof CurrencyWalletDoesNotExistsError) {
+        throw new HttpException(error.message, HttpStatus.NOT_ACCEPTABLE);
+      }
+      if (error instanceof InsufficientFundsError) {
+        throw new HttpException(error.message, HttpStatus.NOT_ACCEPTABLE);
+      }
+
+      throw error;
+    }
+  }
+
+  @Post('buy-pln')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Exchanges provided currency to PLN' })
+  @ApiCreatedResponse()
+  @ApiBadRequestResponse()
+  @ApiNotAcceptableResponse({ type: HttpExceptionResponseDto })
+  async exchangeCurrencyToPln(
+    @Body() body: ExchangeCurrencyToPlnDto,
+    @UserFromBearer() user: JwtUser,
+  ): Promise<void> {
+    try {
+      await this.exchangeRateApiService.exchangeCurrencyToPln({
         ...body,
         userId: user.userId,
       });
