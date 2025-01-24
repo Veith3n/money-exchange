@@ -12,6 +12,13 @@ export class WalletService {
     private readonly walletRepo: Repository<Wallet>,
   ) {}
 
+  public async findForUserAndCurrency(
+    userId: number,
+    currencyCode: CurrencyCode,
+  ): Promise<Wallet | undefined> {
+    return this.walletRepo.findOneBy({ userId, currencyCode });
+  }
+
   public async findOrCreateForUserAndCurrencyCode(
     userId: number,
     currencyCode: CurrencyCode,
@@ -24,6 +31,10 @@ export class WalletService {
     }
 
     return wallet;
+  }
+
+  public saveAll(wallets: Wallet[]): Promise<Wallet[]> {
+    return this.walletRepo.save(wallets);
   }
 
   public save(wallet: Wallet): Promise<Wallet> {
