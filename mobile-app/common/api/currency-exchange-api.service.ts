@@ -7,6 +7,7 @@ import {
   LoginResponse,
   RegisterResponse,
   SuccessApiResponse,
+  WalletDto,
 } from '@/common/api/currency-exchange-api.types';
 import { CurrencyCode } from '@/types/currency-codes.enum';
 
@@ -51,6 +52,29 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
       .then((response) => response.data);
   }
 
+  getWallets(authToken: string): Promise<WalletDto[]> {
+    const url = `${this.baseUrl()}/api/wallets`;
+
+    return this.axiosGetWithAuth({ authToken, url });
+  }
+
+  topUpWallet(
+    authToken: string,
+    currencyCode: CurrencyCode,
+    amount: number,
+  ): Promise<WalletDto> {
+    const url = `${this.baseUrl()}/api/wallets/top-up`;
+
+    return this.axiosPostWithAuth({
+      authToken,
+      url,
+      body: {
+        currencyCode,
+        amount: amount.toString(),
+      },
+    });
+  }
+
   public async getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
     date?: Date,
@@ -88,6 +112,34 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
       success: true,
       data: response.data,
     };
+  }
+
+  private axiosGetWithAuth<T>({
+    authToken,
+    url,
+  }: {
+    authToken: string;
+    url: string;
+  }): Promise<T> {
+    return axios
+      .get<T>(url, { headers: { Authorization: `Bearer ${authToken}` } })
+      .then((response) => response.data);
+  }
+
+  private axiosPostWithAuth<T>({
+    authToken,
+    url,
+    body,
+  }: {
+    authToken: string;
+    url: string;
+    body: object;
+  }): Promise<T> {
+    return axios
+      .post<T>(url, body, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      })
+      .then((response) => response.data);
   }
 }
 
