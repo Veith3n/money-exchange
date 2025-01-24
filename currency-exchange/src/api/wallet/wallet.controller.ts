@@ -29,7 +29,7 @@ export class WalletController {
     return wallets;
   }
 
-  @Post()
+  @Post('top-up')
   @ApiOperation({
     summary:
       'Tops up wallet for given currency if not exits for given currency creates new one',
