@@ -5,6 +5,10 @@ import { CurrencyCode } from 'src/types/currency-codes.enum';
 
 import { WalletService } from '../../models/entities/wallet/wallet.service';
 import { ExchangeRateDto } from './dto/exchange-rate.dto';
+import {
+  CurrencyWalletDoesNotExistsError,
+  InsufficientFundsError,
+} from './errors/errors';
 
 @Injectable()
 export class ExchangeRateApiService {
@@ -28,11 +32,11 @@ export class ExchangeRateApiService {
     );
 
     if (!plnWallet) {
-      throw new Error('PLN wallet not found');
+      throw new CurrencyWalletDoesNotExistsError(CurrencyCode.PLN);
     }
 
     if (parseFloat(plnWallet.balance) < amountOfPln) {
-      throw new Error('Insufficient funds');
+      throw new InsufficientFundsError();
     }
 
     const exchangeRate =
