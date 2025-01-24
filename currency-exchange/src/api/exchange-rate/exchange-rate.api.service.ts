@@ -28,42 +28,11 @@ export class ExchangeRateApiService {
     otherCurrencyCode: CurrencyCode;
     amountOfPln: number;
   }): Promise<void> {
-    const plnWallet = await this.walletService.findForUserAndCurrency(
+    return this.exchangeFirstCurrencyToSecondCurrency({
+      currencyToBeSold: CurrencyCode.PLN,
+      currencyToBought: otherCurrencyCode,
       userId,
-      CurrencyCode.PLN,
-    );
-
-    if (!plnWallet) {
-      throw new CurrencyWalletDoesNotExistsError(CurrencyCode.PLN);
-    }
-
-    if (parseFloat(plnWallet.balance) < amountOfPln) {
-      throw new InsufficientFundsError();
-    }
-
-    const exchangeRate =
-      await this.getExchangeRateForCurrency(otherCurrencyCode);
-
-    const amountOfOtherCurrency = amountOfPln / exchangeRate.exchangeRateToPln;
-
-    const otherCurrencyWallet =
-      await this.walletService.findOrCreateForUserAndCurrencyCode(
-        userId,
-        otherCurrencyCode,
-      );
-
-    otherCurrencyWallet.topUp(amountOfOtherCurrency);
-    plnWallet.withdraw(amountOfPln);
-
-    await this.walletService.saveAll([plnWallet, otherCurrencyWallet]);
-
-    await this.swapService.create({
-      userId,
-      boughtCurrencyCode: otherCurrencyCode,
-      boughtCurrencyValue: amountOfOtherCurrency,
-      soldCurrencyCode: CurrencyCode.PLN,
-      soldCurrencyValue: amountOfPln,
-      exchangeRate: exchangeRate.exchangeRateToPln,
+      amountOfCurrencyToBeSold: amountOfPln,
     });
   }
 
@@ -77,6 +46,70 @@ export class ExchangeRateApiService {
     );
 
     return this.mapExchangeRateResponseToDto(response);
+  }
+
+  private async exchangeFirstCurrencyToSecondCurrency({
+    currencyToBeSold,
+    currencyToBought,
+    userId,
+    amountOfCurrencyToBeSold,
+  }: {
+    currencyToBeSold: CurrencyCode;
+    currencyToBought: CurrencyCode;
+    userId: number;
+    amountOfCurrencyToBeSold: number;
+  }): Promise<void> {
+    if (![currencyToBought, currencyToBeSold].includes(CurrencyCode.PLN)) {
+      throw new Error(
+        'Unsupported currency exchange, one of the currencies must be PLN',
+      );
+    }
+
+    const currencyToBeSoldWallet =
+      await this.walletService.findForUserAndCurrency(userId, currencyToBeSold);
+
+    if (!currencyToBeSoldWallet) {
+      throw new CurrencyWalletDoesNotExistsError(currencyToBeSold);
+    }
+
+    if (parseFloat(currencyToBeSoldWallet.balance) < amountOfCurrencyToBeSold) {
+      throw new InsufficientFundsError();
+    }
+
+    const isPlnBeingSold = currencyToBeSold === CurrencyCode.PLN;
+    const nonPlnCurrencyCode = isPlnBeingSold
+      ? currencyToBought
+      : currencyToBeSold;
+
+    const { exchangeRateToPln } =
+      await this.getExchangeRateForCurrency(nonPlnCurrencyCode);
+
+    const amountOfBoughtCurrency = isPlnBeingSold
+      ? amountOfCurrencyToBeSold / exchangeRateToPln
+      : amountOfCurrencyToBeSold * exchangeRateToPln;
+
+    const currencyToBeBoughtWallet =
+      await this.walletService.findOrCreateForUserAndCurrencyCode(
+        userId,
+        currencyToBought,
+      );
+
+    currencyToBeSoldWallet.withdraw(amountOfCurrencyToBeSold);
+    currencyToBeBoughtWallet.topUp(amountOfBoughtCurrency);
+
+    await this.walletService.saveAll([
+      currencyToBeSoldWallet,
+      currencyToBeBoughtWallet,
+    ]);
+
+    await this.swapService.create({
+      userId,
+      boughtCurrencyCode: currencyToBought,
+      boughtCurrencyValue: amountOfBoughtCurrency,
+      soldCurrencyCode: currencyToBeSold,
+      soldCurrencyValue: amountOfCurrencyToBeSold,
+      exchangeRate: exchangeRateToPln,
+    });
   }
 
   private mapExchangeRateResponseToDto(
