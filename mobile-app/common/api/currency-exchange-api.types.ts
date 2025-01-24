@@ -16,6 +16,10 @@ export interface ICurrencyExchangeApiService {
     currencyCode: CurrencyCode,
     amount: number,
   ): Promise<WalletDto>;
+
+  sellPln(authToken: string, body: ExchangePlnToCurrencyDto): Promise<void>;
+
+  buyPln(authToken: string, body: ExchangeCurrencyToPlnDto): Promise<void>;
 }
 
 export interface LoginResponse {
@@ -37,6 +41,16 @@ export interface ExchangeRateResponse {
 export interface WalletDto {
   currencyCode: CurrencyCode;
   balance: string;
+}
+
+export interface ExchangePlnToCurrencyDto {
+  otherCurrencyCode: CurrencyCode;
+  amountOfPln: number;
+}
+
+export interface ExchangeCurrencyToPlnDto {
+  otherCurrencyCode: CurrencyCode;
+  amountOfOtherCurrency: number;
 }
 
 export type ApiResponse<T> = SuccessApiResponse<T> | FailedApiResponse;
