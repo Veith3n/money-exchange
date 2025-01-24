@@ -7,6 +7,7 @@ import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.servi
 import { WalletDto } from '@/common/api/currency-exchange-api.types';
 import { ThemedText, ThemedTextInput } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { CurrencyCode } from '@/types/currency-codes.enum';
 
 export default function Wallets() {
   const [wallets, setWallets] = useState<WalletDto[]>([]);
@@ -70,6 +71,9 @@ export default function Wallets() {
     };
     const handleWalletSellPress = (wallet: WalletDto) => {};
     const handleWalletBuyPress = (wallet: WalletDto) => {};
+    const buyButtonEnabled = wallets.some(
+      (wallet) => wallet.currencyCode === CurrencyCode.PLN,
+    );
 
     return (
       <WalletItem
@@ -77,6 +81,7 @@ export default function Wallets() {
         onWalletTopUpPress={handleWalletTopUpPress}
         onWalletBuyPress={handleWalletBuyPress}
         onWalletSellPress={handleWalletSellPress}
+        buyButtonDisabled={!buyButtonEnabled}
       />
     );
   };
@@ -113,11 +118,13 @@ const WalletItem = ({
   onWalletTopUpPress,
   onWalletBuyPress,
   onWalletSellPress,
+  buyButtonDisabled,
 }: {
   wallet: WalletDto;
   onWalletTopUpPress: (wallet: WalletDto) => void;
   onWalletSellPress: (wallet: WalletDto) => void;
   onWalletBuyPress: (wallet: WalletDto) => void;
+  buyButtonDisabled: boolean;
 }) => {
   return (
     <View style={styles.walletItem}>
@@ -133,7 +140,11 @@ const WalletItem = ({
         <Button mode="contained" onPress={() => onWalletSellPress(wallet)}>
           Sell
         </Button>
-        <Button mode="contained" onPress={() => onWalletBuyPress(wallet)}>
+        <Button
+          mode="contained"
+          onPress={() => onWalletBuyPress(wallet)}
+          disabled={buyButtonDisabled}
+        >
           Buy
         </Button>
         <Button mode="contained" onPress={() => onWalletTopUpPress(wallet)}>
