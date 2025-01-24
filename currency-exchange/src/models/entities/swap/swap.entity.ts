@@ -36,6 +36,7 @@ export class Swap {
   soldCurrencyValue: number;
 
   @Column({ name: 'exchange_rate', type: 'double precision' })
+  // exchangeRate of bought currency to sold currency
   exchangeRate!: number;
 
   @CreateDateColumn({ name: 'created_at' })

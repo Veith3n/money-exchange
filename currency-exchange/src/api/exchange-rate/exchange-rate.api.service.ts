@@ -115,13 +115,17 @@ export class ExchangeRateApiService {
       currencyToBeBoughtWallet,
     ]);
 
+    const exchangeRate = isPlnBeingSold
+      ? exchangeRateToPln
+      : 1 / exchangeRateToPln;
+
     await this.swapService.create({
       userId,
       boughtCurrencyCode: currencyToBought,
       boughtCurrencyValue: amountOfBoughtCurrency,
       soldCurrencyCode: currencyToBeSold,
       soldCurrencyValue: amountOfCurrencyToBeSold,
-      exchangeRate: exchangeRateToPln,
+      exchangeRate,
     });
   }
 
