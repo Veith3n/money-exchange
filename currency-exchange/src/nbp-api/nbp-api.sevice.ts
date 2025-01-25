@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { CurrencyCode } from 'src/types/currency-codes.enum';
 
 import { ExchangeRateResponseDto } from './dto/exchange-rate-response.dto';
@@ -26,30 +26,24 @@ export class NbpApiService {
    */
   public async getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
+    date?: string,
   ): Promise<ExchangeRateResponseDto> {
-    const getExchangeRateForCurrency = async (
-      currencyCode: CurrencyCode,
-      table: string,
-    ) => {
-      const endpointUrl = `${this.BASE_URL}/${table}/${currencyCode}/`;
-
-      return axios
-        .get<ExchangeRateResponseDto>(endpointUrl)
-        .then((response) => response.data)
-        .catch((error) =>
-          console.error(
-            `Failed to fetch exchange rate from table ${table}:`,
-            error.message,
-          ),
-        );
-    };
+    const responses: FailedApiResponse[] = [];
 
     for (const table of this.TABLES) {
       try {
-        const response = await getExchangeRateForCurrency(currencyCode, table);
+        const response = await this.fetchExchangeRateForCurrency(
+          currencyCode,
+          table,
+          date,
+        );
 
-        if (response) {
-          return response;
+        if (response.success) {
+          return response.data;
+        }
+
+        if (!isSuccessResponse(response)) {
+          responses.push(response);
         }
       } catch (error: unknown) {
         console.error(
@@ -59,10 +53,81 @@ export class NbpApiService {
       }
     }
 
-    // If all requests fail, throw an exception
+    const noDataFound = responses.length === this.TABLES.length;
+
+    if (noDataFound) {
+      throw new HttpException(
+        `Failed to fetch exchange rate for currency ${currencyCode} for given date`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     throw new HttpException(
       `Failed to fetch exchange rate for currency ${currencyCode} from all tables`,
       HttpStatus.BAD_REQUEST,
     );
   }
+
+  private async fetchExchangeRateForCurrency(
+    currencyCode: CurrencyCode,
+    table: string,
+    date?: string,
+  ): Promise<ApiResponse<ExchangeRateResponseDto>> {
+    const baseUrl = `${this.BASE_URL}/${table}/${currencyCode}/`;
+
+    // If the date is provided, append it to the URL so we fetch date for that specific day
+    const endpointUrl = date ? `${baseUrl}/${date}/` : baseUrl;
+
+    return axios
+      .get<ExchangeRateResponseDto>(endpointUrl)
+      .then((response) => this.handleSuccessResponse(response))
+      .catch((error: AxiosError) =>
+        this.handleErrorResponse(error, table, date),
+      );
+  }
+
+  private handleSuccessResponse<T>(
+    response: AxiosResponse<T, any>,
+  ): SuccessApiResponse<T> {
+    return {
+      success: true,
+      data: response.data,
+    };
+  }
+
+  private handleErrorResponse(
+    error: AxiosError,
+    table: string,
+    date?: string,
+  ): FailedApiResponse {
+    let responseData: string | undefined;
+
+    if (typeof error.response?.data === 'string') {
+      responseData = error.response.data;
+    }
+    const noDataMsg = 'Brak danych';
+    const isNoDataResponse =
+      date && responseData && responseData.includes(noDataMsg);
+
+    if (isNoDataResponse) {
+      console.error(`No data for the given date: ${date} in table: ${table}`);
+
+      return { success: false, message: 'No data for the given date' };
+    }
+
+    console.error(`Failed to fetch exchange rate from table: ${table}:`);
+
+    return { success: false };
+  }
 }
+
+const isSuccessResponse = (
+  response: ApiResponse<ExchangeRateResponseDto>,
+): response is SuccessApiResponse<ExchangeRateResponseDto> => {
+  return response.success === true;
+};
+
+type ApiResponse<T> = SuccessApiResponse<T> | FailedApiResponse;
+
+type SuccessApiResponse<T> = { success: true; data: T };
+type FailedApiResponse = { success: false; message?: string };

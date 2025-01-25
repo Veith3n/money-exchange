@@ -11,9 +11,12 @@ export class ExchangeRateApiService {
 
   public async getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
+    iso8601Date?: string,
   ): Promise<ExchangeRateDto> {
-    const response =
-      await this.nbpApiService.getExchangeRateForCurrency(currencyCode);
+    const response = await this.nbpApiService.getExchangeRateForCurrency(
+      currencyCode,
+      iso8601Date,
+    );
 
     return this.mapExchangeRateResponseToDto(response);
   }
