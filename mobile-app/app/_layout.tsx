@@ -15,6 +15,13 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { SessionProvider } from './ctx';
 
+export enum ROUTES {
+  LOGIN = '/login',
+  REGISTER = '/register',
+  HOME = '/HomeScreen',
+  TABS = '/',
+}
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 

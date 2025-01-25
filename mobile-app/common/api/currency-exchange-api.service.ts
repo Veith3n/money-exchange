@@ -1,10 +1,12 @@
 import axios from 'axios';
 
 import {
+  ExchangeRateResponse,
   ICurrencyExchangeApiService,
   LoginResponse,
   RegisterResponse,
 } from '@/common/api/currency-exchange-api.types';
+import { CurrencyCode } from '@/types/currency-codes.enum';
 
 class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
   static readonly BASE_URL = 'http://localhost:3000';
@@ -44,6 +46,16 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
         email: username,
         password,
       })
+      .then((response) => response.data);
+  }
+
+  public async getExchangeRateForCurrency(
+    currencyCode: CurrencyCode,
+  ): Promise<ExchangeRateResponse> {
+    const exchangeRateUrl = `${this.baseUrl()}/api/exchange-rate`;
+
+    return axios
+      .get<ExchangeRateResponse>(exchangeRateUrl, { params: { currencyCode } })
       .then((response) => response.data);
   }
 
