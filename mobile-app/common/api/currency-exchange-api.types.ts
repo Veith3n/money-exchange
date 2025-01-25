@@ -8,6 +8,14 @@ export interface ICurrencyExchangeApiService {
   getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
   ): Promise<ApiResponse<ExchangeRateResponse>>;
+
+  getWallets(authToken: string): Promise<WalletDto[]>;
+
+  topUpWallet(
+    authToken: string,
+    currencyCode: CurrencyCode,
+    amount: number,
+  ): Promise<WalletDto>;
 }
 
 export interface LoginResponse {
@@ -24,6 +32,11 @@ export interface ExchangeRateResponse {
   exchangeRateToPln: number;
 
   exchangeRateDate: string;
+}
+
+export interface WalletDto {
+  currencyCode: CurrencyCode;
+  balance: string;
 }
 
 export type ApiResponse<T> = SuccessApiResponse<T> | FailedApiResponse;
