@@ -1,4 +1,5 @@
 import { NavigationProp } from '@react-navigation/native';
+import { AxiosError } from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Button, StyleSheet } from 'react-native';
@@ -36,7 +37,9 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
     } catch (error: unknown) {
       setErrorMessage('Registration failed. Please try again.');
 
-      console.error('Registration failed', error.response?.data);
+      if (error instanceof AxiosError) {
+        console.error('Registration failed', error.response?.data);
+      }
     }
   };
 
