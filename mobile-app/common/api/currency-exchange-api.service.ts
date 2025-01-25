@@ -2,6 +2,8 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import {
   ApiResponse,
+  ExchangeCurrencyToPlnDto,
+  ExchangePlnToCurrencyDto,
   ExchangeRateResponse,
   ICurrencyExchangeApiService,
   LoginResponse,
@@ -97,6 +99,18 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
 
         throw error;
       });
+  }
+
+  sellPln(authToken: string, body: ExchangePlnToCurrencyDto): Promise<void> {
+    const url = `${this.baseUrl()}/api/exchange-rate/sell-pln`;
+
+    return this.axiosPostWithAuth({ authToken, url, body });
+  }
+
+  buyPln(authToken: string, body: ExchangeCurrencyToPlnDto): Promise<void> {
+    const url = `${this.baseUrl()}/api/exchange-rate/buy-pln`;
+
+    return this.axiosPostWithAuth({ authToken, url, body });
   }
 
   private baseUrl(): string {
