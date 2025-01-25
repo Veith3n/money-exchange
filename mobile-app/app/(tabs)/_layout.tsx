@@ -5,7 +5,6 @@ import { Platform } from 'react-native';
 
 import AuthWrapper from '@/components/AuthWrapper';
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -33,30 +32,22 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="house.fill" color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="explore"
-          options={{
-            title: 'Explore',
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="paperplane.fill" color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="wallets"
-          options={{
             title: 'Wallets',
             tabBarIcon: ({ color }) => (
               <MaterialIcons name="wallet" size={28} color={color} />
             ),
           }}
         />
+
+        {/*<Tabs.Screen*/}
+        {/*  name="wallets"*/}
+        {/*  options={{*/}
+        {/*    title: 'Wallets',*/}
+        {/*    tabBarIcon: ({ color }) => (*/}
+        {/*      <MaterialIcons name="wallet" size={28} color={color} />*/}
+        {/*    ),*/}
+        {/*  }}*/}
+        {/*/>*/}
         <Tabs.Screen
           name="exchange-rate-checker"
           options={{

@@ -6,8 +6,8 @@ import { Button, StyleSheet } from 'react-native';
 import { ThemedText, ThemedTextInput } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-import { useSession } from './ctx';
 import { ROUTES } from './_layout';
+import { useSession } from './ctx';
 
 interface LoginScreenProps {
   navigation: NavigationProp<any>;
