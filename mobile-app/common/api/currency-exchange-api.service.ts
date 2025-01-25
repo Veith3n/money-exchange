@@ -1,10 +1,12 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import {
+  ApiResponse,
   ExchangeRateResponse,
   ICurrencyExchangeApiService,
   LoginResponse,
   RegisterResponse,
+  SuccessApiResponse,
 } from '@/common/api/currency-exchange-api.types';
 import { CurrencyCode } from '@/types/currency-codes.enum';
 
@@ -51,18 +53,41 @@ class CurrencyExchangeApiService implements ICurrencyExchangeApiService {
 
   public async getExchangeRateForCurrency(
     currencyCode: CurrencyCode,
-  ): Promise<ExchangeRateResponse> {
+    date?: Date,
+  ): Promise<ApiResponse<ExchangeRateResponse>> {
     const exchangeRateUrl = `${this.baseUrl()}/api/exchange-rate`;
+    const iso8601Date = date ? date.toISOString().split('T')[0] : undefined;
 
     return axios
-      .get<ExchangeRateResponse>(exchangeRateUrl, { params: { currencyCode } })
-      .then((response) => response.data);
+      .get<ExchangeRateResponse>(exchangeRateUrl, {
+        params: { currencyCode, iso8601Date },
+      })
+      .then((response) => this.handleSuccessResponse(response))
+      .catch((error: AxiosError) => {
+        if (error.response?.status === 404) {
+          return {
+            success: false,
+            message: 'Exchange rate not found for given dates',
+          };
+        }
+
+        throw error;
+      });
   }
 
   private baseUrl(): string {
     return (
       process.env.EXPO_PUBLIC_BE_URL || CurrencyExchangeApiService.BASE_URL
     );
+  }
+
+  private handleSuccessResponse<T>(
+    response: AxiosResponse<T, unknown>,
+  ): SuccessApiResponse<T> {
+    return {
+      success: true,
+      data: response.data,
+    };
   }
 }
 
