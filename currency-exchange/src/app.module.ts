@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { ExchangeRateApiModule } from './api/exchange-rate/exchange-rate.api.module';
+import { SwapApiModule } from './api/swap/swap.api.module';
 import { UserApiModule } from './api/user/user.api.module';
 import { WalletApiModule } from './api/wallet/wallet.api.module';
 import { AppController } from './app.controller';
@@ -19,6 +20,7 @@ import { DatabaseModule } from './models/entities/database.module';
     ExchangeRateApiModule,
     UserApiModule,
     WalletApiModule,
+    SwapApiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
