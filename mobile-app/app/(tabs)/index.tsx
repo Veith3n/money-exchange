@@ -5,6 +5,7 @@ import { Button, Provider as PaperProvider } from 'react-native-paper';
 import { useSession } from '@/app/ctx';
 import CurrencyExchangeApiService from '@/common/api/currency-exchange-api.service';
 import { WalletDto } from '@/common/api/currency-exchange-api.types';
+import AddWalletModal from '@/components/AddWalletModal';
 import { ThemedText, ThemedTextInput } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { CurrencyCode } from '@/types/currency-codes.enum';
@@ -16,10 +17,11 @@ export default function Wallets() {
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState<WalletDto | null>(null);
-  const [topUpAmount, setTopUpAmount] = useState('');
-  const [sellAmount, setSellAmount] = useState('');
-  const [buyAmount, setBuyAmount] = useState('');
+  const [topUpAmount, setTopUpAmount] = useState<number | undefined>(undefined);
+  const [sellAmount, setSellAmount] = useState<number | undefined>(undefined);
+  const [buyAmount, setBuyAmount] = useState<number | undefined>(undefined);
   const { session } = useSession();
+  const [addWalletModalVisible, setAddWalletModalVisible] = useState(false);
 
   const currencyExchangeApiService = CurrencyExchangeApiService.getInstance();
 
@@ -45,16 +47,41 @@ export default function Wallets() {
     fetchWallets();
   }, [session, currencyExchangeApiService]);
 
-  const handleTopUp = async () => {
-    if (selectedWallet && topUpAmount && session?.accessToken) {
+  const handleAddWallet = async (
+    currencyCode: CurrencyCode,
+    amount: number,
+  ) => {
+    if (currencyCode && amount && session?.accessToken) {
       try {
         await currencyExchangeApiService.topUpWallet(
           session.accessToken,
+          currencyCode,
+          amount,
+        );
+        // Refresh wallets after adding
+        const wallets = await currencyExchangeApiService.getWallets(
+          session.accessToken,
+        );
+        console.log('Wallets after adding:', wallets);
+        setWallets(sortWallets(wallets));
+      } catch (err: unknown) {
+        setError('Failed to add wallet. Please try again.');
+      }
+    }
+  };
+
+  const handleTopUp = async () => {
+    if (selectedWallet && topUpAmount && session?.accessToken) {
+      try {
+        console.log('Topping up wallet');
+        await currencyExchangeApiService.topUpWallet(
+          session.accessToken,
           selectedWallet.currencyCode,
-          parseFloat(topUpAmount),
+          topUpAmount,
         );
         setTopUpModalVisible(false);
-        setTopUpAmount('');
+        setTopUpAmount(undefined);
+        setError(null);
 
         // Refresh wallets
         const wallets = await currencyExchangeApiService.getWallets(
@@ -72,11 +99,12 @@ export default function Wallets() {
     if (selectedWallet && sellAmount && session?.accessToken) {
       try {
         await currencyExchangeApiService.buyPln(session.accessToken, {
-          amountOfOtherCurrency: parseFloat(sellAmount),
+          amountOfOtherCurrency: sellAmount,
           otherCurrencyCode: selectedWallet.currencyCode,
         });
         setSellModalVisible(false);
-        setSellAmount('');
+        setSellAmount(undefined);
+        setError(null);
 
         // Refresh wallets
         const wallets = await currencyExchangeApiService.getWallets(
@@ -94,11 +122,11 @@ export default function Wallets() {
     if (selectedWallet && buyAmount && session?.accessToken) {
       try {
         await currencyExchangeApiService.sellPln(session.accessToken, {
-          amountOfPln: parseFloat(buyAmount),
+          amountOfPln: buyAmount,
           otherCurrencyCode: selectedWallet.currencyCode,
         });
         setBuyModalVisible(false);
-        setBuyAmount('');
+        setBuyAmount(undefined);
 
         // Refresh wallets
         const wallets = await currencyExchangeApiService.getWallets(
@@ -145,6 +173,9 @@ export default function Wallets() {
     <PaperProvider>
       <ThemedView style={styles.container}>
         <ThemedText style={styles.title}>Your Wallets</ThemedText>
+        <Button onPress={() => setAddWalletModalVisible(true)}>
+          Add Wallet
+        </Button>
 
         {error && <ThemedText style={styles.error}>{error}</ThemedText>}
 
@@ -155,6 +186,12 @@ export default function Wallets() {
           contentContainerStyle={styles.list}
         />
 
+        <AddWalletModal
+          modalVisible={addWalletModalVisible}
+          setModalVisible={setAddWalletModalVisible}
+          existingWallets={wallets}
+          handleAddWallet={handleAddWallet}
+        />
         <TopUpModal
           handleTopUp={handleTopUp}
           modalVisible={topUpModalVisible}
@@ -245,8 +282,8 @@ const SellModal = ({
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
   selectedWallet: WalletDto | null;
-  sellAmount: string;
-  setSellAmount: (amount: string) => void;
+  sellAmount: number | undefined;
+  setSellAmount: (amount: number) => void;
   handleTopUp: () => void;
 }) => {
   return (
@@ -258,7 +295,7 @@ const SellModal = ({
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
       selectedWallet={selectedWallet}
-      amount={sellAmount}
+      amount={sellAmount?.toString() || ''}
       setAmount={setSellAmount}
     />
   );
@@ -275,8 +312,8 @@ const BuyModal = ({
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
   selectedWallet: WalletDto | null;
-  buyAmount: string;
-  setBuyAmount: (amount: string) => void;
+  buyAmount: number | undefined;
+  setBuyAmount: (amount: number) => void;
   handleTopUp: () => void;
 }) => {
   return (
@@ -288,7 +325,7 @@ const BuyModal = ({
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
       selectedWallet={selectedWallet}
-      amount={buyAmount}
+      amount={buyAmount?.toString() || ''}
       setAmount={setBuyAmount}
     />
   );
@@ -305,8 +342,8 @@ const TopUpModal = ({
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
   selectedWallet: WalletDto | null;
-  topUpAmount: string;
-  setTopUpAmount: (amount: string) => void;
+  topUpAmount: number | undefined;
+  setTopUpAmount: (amount: number) => void;
   handleTopUp: () => void;
 }) => {
   return (
@@ -317,7 +354,7 @@ const TopUpModal = ({
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
       selectedWallet={selectedWallet}
-      amount={topUpAmount}
+      amount={topUpAmount?.toString() || ''}
       setAmount={setTopUpAmount}
     />
   );
@@ -338,7 +375,7 @@ const WalletModal = ({
   setModalVisible: (visible: boolean) => void;
   selectedWallet: WalletDto | null;
   amount: string;
-  setAmount: (amount: string) => void;
+  setAmount: (amount: number) => void;
   handleAction: () => void;
   actionLabel: string;
   title: string;
@@ -361,13 +398,23 @@ const WalletModal = ({
             placeholder="Enter amount"
             keyboardType="numeric"
             value={amount}
-            onChangeText={setAmount}
+            onChangeText={(text) => {
+              // Allow only numbers and a single decimal point
+              const numericValue = text.replace(/[^0-9.]/g, '');
+              setAmount(parseFloat(numericValue));
+            }}
           />
           <View style={styles.modalButtons}>
             <Button mode="contained" onPress={handleAction}>
               {actionLabel}
             </Button>
-            <Button mode="outlined" onPress={() => setModalVisible(false)}>
+            <Button
+              mode="outlined"
+              onPress={() => {
+                setModalVisible(false);
+                setAmount(0);
+              }}
+            >
               Cancel
             </Button>
           </View>

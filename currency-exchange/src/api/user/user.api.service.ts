@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { User } from 'src/models/entities/user/user.entity';
 import { UserService } from 'src/models/entities/user/user.service';
-import * as bcrypt from 'bcrypt';
+import { CurrencyCode } from 'src/types/currency-codes.enum';
 
+import { WalletApiService } from '../wallet/wallet.api.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserApiService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly walletApiService: WalletApiService,
+  ) {}
 
   /**
    * Creates a new user.
@@ -23,6 +28,9 @@ export class UserApiService {
       ...userDto,
       password: hashedPassword,
     });
+
+    // Create a wallet for the user with PLN currency
+    await this.walletApiService.topUp(createdUser.id, CurrencyCode.PLN, 0);
 
     return this.mapUserToDto(createdUser);
   }
